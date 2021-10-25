@@ -2,9 +2,9 @@ package com.safetynet.application;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.safetynet.application.controller.DataController;
+import com.safetynet.application.model.Person;
 import com.safetynet.application.repository.DataReadingDAO;
 import com.safetynet.application.repository.DataWritingDAO;
-import com.safetynet.application.model.Person;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,10 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import static org.hamcrest.Matchers.containsString;
-import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -160,12 +157,9 @@ class DataTest {
 	}
 
 	//ENDPOINT PERSON
-	/*@Test
+	@Test
 	public void givenAPersonInformations_AddANewPersonInTheDataFiles() throws Exception {
 		//GIVEN
-		//final String baseUrl = "http://localhost:"+serverPort+"/person";
-		//URI uri = new URI(baseUrl);
-
 		Person person = new Person();
 		person.setFirstName(firstName);
 		person.setLastName(lastName);
@@ -176,7 +170,15 @@ class DataTest {
 		person.setEmail(email);
 
 		//WHEN
-		//mockMvc.perform(post("/person")).flashAttr("ADDED_OBJECT", person)
+		mockMvc.perform(post("/person")
+				.param("firstName", person.getFirstName())
+				.param("lastName", person.getLastName())
+				.param("address", person.getAddress())
+				.param("city", person.getCity()).param("zip", person.getZip())
+				.param("phone", person.getPhone())
+				.param("email", person.getEmail()))
+				.andDo(print()).andExpect(status().isOk());
+
 		//		.andExpect(status().isOk()).andDo(print());
 				//.andExpect(status().isOk());
 		//mockMvc.perform(post(uri)).andExpect(status().isOk());
@@ -188,7 +190,7 @@ class DataTest {
 
 		//THEN
 
-	}*/
+	}
 
 	@Test
 	public void givenAPersonNameAndLastName_UpdateHisPersonnalInformations(){

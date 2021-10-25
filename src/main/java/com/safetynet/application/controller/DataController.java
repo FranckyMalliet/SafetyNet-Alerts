@@ -1,217 +1,262 @@
 package com.safetynet.application.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.safetynet.application.repository.DataReadingDAO;
-import com.safetynet.application.repository.DataWritingDAO;
-import com.safetynet.application.repository.JsonFileCurrentDataDAO;
+import com.safetynet.application.model.FireStation;
+import com.safetynet.application.model.MedicalRecord;
 import com.safetynet.application.model.Person;
-import net.minidev.json.JSONArray;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.safetynet.application.repository.DataDeletingDAO;
+import com.safetynet.application.repository.DataReadingDAO;
+import com.safetynet.application.repository.DataUpdatingDAO;
+import com.safetynet.application.repository.DataWritingDAO;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.PostConstruct;
-import javax.xml.crypto.Data;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
-@Component
+/**
+ * DataController class is using Url and Uri to get information from a Json file
+ *
+ */
+
 @RestController
 public class DataController {
 
-    private static Logger logger = LoggerFactory.getLogger(DataController.class);
     private ObjectMapper mapper = new ObjectMapper();
 
-    private Person person;
+    @Autowired
+    private DataReadingDAO dataReadingDAO;
 
     @Autowired
     private DataWritingDAO dataWritingDAO;
 
     @Autowired
-    private DataReadingDAO dataReadingDAO;
-    //private JsonFileCurrentDataDAO jsonFileCurrentDataDAO;
+    private DataUpdatingDAO dataUpdatingDAO;
 
-    public DataController(){}
+    @Autowired
+    private DataDeletingDAO dataDeletingDAO;
 
-    public DataController(DataWritingDAO dataWritingDAO){
-        this.dataWritingDAO = dataWritingDAO;
-    }
-
-    public DataController(DataReadingDAO dataReadingDAO){
-        this.dataReadingDAO = dataReadingDAO;
-    }
-
-    /*//Must be written /personInfo?firstName=firstName&lastName=lastName
-    @GetMapping(value = "/personInfo")
-    public String personInfo(@RequestParam String firstName, @RequestParam String lastName){
-        var v= dataReadingDAO.readPersonData(firstName, lastName);
-        return v.stream().map(p -> p.toString()).collect(Collectors.joining(", "));
-    }*/
-
-    //Must be written /personInfo?firstName=firstName&lastName=lastName
-    /*@GetMapping(value = "/personInfo")
-    public String personInfo(@RequestParam String firstName, @RequestParam String lastName) throws JsonProcessingException {
-        List<Person> data = dataReadingDAO.readPersonData(firstName, lastName);
-        return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(data);
-    }*/
-
-    //Must be written /personInfo?firstName=firstName&lastName=lastName
-    @GetMapping(value = "/personInfo")
-    public String personInfo(@RequestParam String firstName, @RequestParam String lastName) throws JsonProcessingException {
-        List<List<String>> data = dataReadingDAO.readPersonMedicalData(firstName, lastName);
-        return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(data);
-    }
-
-    //Must be written /fireStation?station=stationNumber
-    /*@GetMapping(value = "/fireStation")
-    public String fireStationInfo(@RequestParam String fireStationNumber) throws JsonProcessingException{
-        List<String> data = dataReadingDAO.fireStationResidentData(fireStationNumber);
-        return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(data);
-    }*/
+    /**
+     * This URL must be written /fireStation?stationNumber=stationNumber
+     * @param stationNumber
+     * @return a list of persons covered by a fireStation.
+     * The information are : firstName, lastName, address, phoneNumber and
+     * the number of adults and children in the area
+     * @throws JsonProcessingException
+     */
 
     @GetMapping(value = "/fireStation")
-    public String fireStationInfo(@RequestParam String stationNumber) throws JsonProcessingException {
-        List<String> data = dataReadingDAO.fireStationResidentData(stationNumber);
+    public String fireStationResidentsInfo(@RequestParam String stationNumber) throws JsonProcessingException {
+        List<List<String>> data = dataReadingDAO.getFireStationResidentData(stationNumber);
         return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(data);
-        //Must return email address of every people from a city
+    }
+
+    /**
+     * This URL must be written /childAlert?address=address
+     * @param address
+     * @return a list of children under or equal of 18 years old living in a
+     * specific address
+     * The information are firstName, lastName, age and a list of the other members
+     * of the family
+     * @throws JsonProcessingException
+     */
+
+    @GetMapping(value ="/childAlert")
+    public String getChildrenList(@RequestParam String address) throws JsonProcessingException {
+        List<Person> data = dataReadingDAO.getChildAlert(address);
+        return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(data);
+    }
+
+    /**
+     * This URL must be written /phoneAlert?fireStation=fireStationNumber
+     * @param stationNumber
+     * @return a list of phoneNumber of all residents deserved by a
+     * specific fireStation
+     * @throws JsonProcessingException
+     */
+
+    @GetMapping(value = "phoneAlert")
+    public String getResidentsPhone(@RequestParam String stationNumber) throws JsonProcessingException {
+        List<String> data = dataReadingDAO.getResidentPhone(stationNumber);
+        return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(data);
+    }
+
+    /**
+     * This URL must be written /fire?address=address
+     * @param address
+     * @return a list of residents living in a specific address
+     * The information are firstName, lastName, phoneNumber, age, medications and allergies
+     * from each person
+     * @throws JsonProcessingException
+     */
+
+    @GetMapping(value ="fire")
+    public String getMedicalInformationFromAddress(@RequestParam String address) throws JsonProcessingException {
+        List<List<String>> data = dataReadingDAO.getMedicalInformationFromAddress(address);
+        return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(data);
+    }
+
+    /**
+     * This URL must be written /flood/stations?stationNumber=stationNumber
+     * @param stationNumber
+     * @return a list of people deserved by a specific fireStation grouped by address
+     * The information are firstName, lastName, phoneNumber, age, medications, allergies
+     * @throws JsonProcessingException
+     */
+
+    @GetMapping(value ="flood/stations")
+    public String getAllPersonsDataFromAListOfFireStation(@RequestParam String stationNumber) throws JsonProcessingException {
+        List<List<String>> data = dataReadingDAO.getAllPersonsDataFromAListOfFireStation(stationNumber);
+        return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(data);
+    }
+
+    /**
+     * This URL must be written /personInfo?firstName=firstName&lastName=lastName
+     * @param firstName
+     * @param lastName
+     * @return a list of resident by their firstName and lastName
+     * The information are firstName, lastName, address, age, emailAddress, medications and allergies
+     * @throws JsonProcessingException
+     */
+
+    @GetMapping(value = "/personInfo")
+    public String getPersonInfo(@RequestParam String firstName, @RequestParam String lastName) throws JsonProcessingException {
+        List<List<String>> data = dataReadingDAO.getPersonMedicalData(firstName, lastName);
+        return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(data);
+    }
+
+    /**
+     * This URL must be written /communityEmail?city=cityName
+     * @param city
+     * @return a list of emailAddress from a specific city
+     * The information are emailAddress
+     * @throws JsonProcessingException
+     */
+
+    @GetMapping(value = "/communityEmail")
+    public String getAllPeopleEmailFromACity(@RequestParam String city) throws JsonProcessingException {
+        List<String> recoveringEmailData = dataReadingDAO.getEmailData(city);
+        return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(recoveringEmailData);
+    }
+
+
+    // ENDPOINTS
+
+    /**
+     * This URL must be written in PostMan or equivalent
+     * @param person
+     * Add a new person in the json file
+     */
+
+    @PostMapping(value = "/person")
+    public void addNewPerson(@RequestBody Person person){
+        dataWritingDAO.writeNewPersonData(person);
+    }
+
+    /**
+     * This URL must be written in PostMan or equivalent
+     * @param person
+     * Update a person in the json file
+     */
+
+    @PutMapping(value = "/person")
+    public void updatePerson(@RequestBody Person person){
+        dataUpdatingDAO.updatePersonData(person);
+    }
+
+    /**
+     * This URL must be written /person?firstName=firstName&lastName=lastName
+     * @param firstName
+     * @param lastName
+     * Delete a person in the json file
+     */
+
+    @DeleteMapping(value = "/person")
+    public void deletePerson(@RequestParam String firstName, @RequestParam String lastName){
+        dataDeletingDAO.deletePersonData(firstName, lastName);
+    }
+
+    /**
+     * This URL must be written in PostMan or equivalent
+     * @param fireStation
+     * Add a new fireStation in the json file
+     */
+
+    @PostMapping(value = "/firestation")
+    public void addNewFireStation(@RequestBody FireStation fireStation){
+        dataWritingDAO.writeNewFireStationData(fireStation);
+    }
+
+    /**
+     * This URL must be written in PostMan or equivalent
+     * @param fireStation
+     * Update a fireStation in the json file
+     */
+
+    @PutMapping(value = "/firestation")
+    public void updateFirestationNumber(@RequestBody FireStation fireStation){
+        dataUpdatingDAO.updateFireStationData(fireStation);
+    }
+
+    /**
+     * This URL must be written /firestation?address=address&stationNumber=stationNumber
+     * @param address
+     * @param stationNumber
+     * Delete a fireStation in the json file
+     */
+
+    @DeleteMapping(value = "/firestation")
+    public void deleteFirestation(@RequestParam String address, @RequestParam String stationNumber){
+        dataDeletingDAO.deleteFireStationData(address, stationNumber);
+    }
+
+    /**
+     * This URL must be written in PostMan or equivalent
+     * @param medicalRecord
+     * add a new medicalRecord in the json file
+     */
+
+    @PostMapping(value = "/medicalRecord")
+    public void addNewMedicalRecord(@RequestBody MedicalRecord medicalRecord){
+        dataWritingDAO.writeNewMedicalRecordsData(medicalRecord);
+    }
+
+    /**
+     * This URL must be written in PostMan or equivalent
+     * @param medicalRecord
+     * Update a medicalRecord in the json file
+     */
+
+    @PutMapping(value = "/medicalRecord")
+    public void updateMedicalRecord(@RequestBody MedicalRecord medicalRecord){
+        dataUpdatingDAO.updateMedicalRecordsData(medicalRecord);
+    }
+
+    /**
+     * This URL must be written /medicalRecord?firstName=firstName&lastName=lastName
+     * @param firstName
+     * @param lastName
+     * Delete a medical record in the json file
+     */
+
+    @DeleteMapping(value = "/medicalRecord")
+    public void deleteMedicalRecord(@RequestParam String firstName, @RequestParam String lastName){
+        dataDeletingDAO.deleteMedicalRecordData(firstName, lastName);
     }
 
     //URL
-    /*@GetMapping(value = "/firestation?stationNumber=<station_number>")
-    public Data getFireStationNumber(@PathVariable) {
-
-    String getFirestationNumber = baseApiUrl + "/firestation" + stationNumber;
-
+    /*
     logger.info(" Message pour les réponses réussis {}", nomVariable)
 
     logger.error("Message pour les erreurs ou exceptions)
 
     logger.debug("Message pour les étapes ou calculs informatifs)
-
-    Must return the list of people covered by a firestation with name, last name, adress,
-    phone, number of adults, number of children in the area
-    }*/
-
-    /*@GetMapping(value ="/childAlert?address=<adress>")
-    public List<Children> getChildrenList (){
-
-    Must return a list of children aged of 18 or less living in this address. The list must have the name, last name,
-    the age of every children and a list of the other members living here.
-    If they are no children, this url can send a null object
-    }
-
-    @GetMapping(value ="/phoneAlert?firestation=<firestation>")
-    public getEveryPhoneFromAFirestationArea()
-
-    Must return a list of all phones coming from the firestation area.
-     */
-
-
-    /*@GetMapping(value ="/fire?address=<address>")
-    public getPeopleFromASpecificAddressInAFirestationArea(){
-
-       Must return a list of all living people in the given address and the number of the firestation taking care of this address.
-       The list must include the name, phone, age et medical precedents.
-    }*/
-
-
-    /*@GetMapping(value ="/flood/stations?stations=<a list of stations_numbers>")
-    public getAllPeopleAddressDeservedByAFirestation(){
-
-    Must return a list of all addresses deserved by a firestation. The list include name, phone, age and medicals
-    precedents near the name
-    }*/
-
-    /*@GetMapping(value = "/personInfo?firstName=<firstName>&lastName=<lastName>")
-    public @ResponseBody Person getPeopleInformations(
-            @RequestParam(name = "firstName") String firstName,
-            @RequestParam(name = "lastName") String lastName)
-    {
-        Must return the name, address, age, mail address and medicals precedents from someone by
-        Using his name and last name. If two persons has the same name, they must appear.
-        Person person = new Person();
-
-        person = dataReadingDAO.readPersonData(firstName, lastName);
-        return person;
-    }*/
-
-    //Must be written /communityEmail?city=cityName
-    @GetMapping(value = "/communityEmail")
-    public String getAllPeopleEmailFromACity(@RequestParam String city) throws JsonProcessingException {
-        List<String> recoveringEmailData = dataReadingDAO.getEmailData(city);
-        return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(recoveringEmailData);
-      //Must return email address of every people from a city
-    }
-
-    // ENDPOINTS
-    @PostMapping(value = "/person")
-    public @ResponseBody Object addNewPerson(@RequestBody Person person){
-        return dataWritingDAO.writePersonData(person);
-    }
-
-    /*
-    @PutMapping(value = "/person")
-    public updatePerson(){
-
-        Update a person, except the name and last name, all the other data can be changed
-    }
-
-    @DeleteMapping(value = "/person")
-    public deletePerson(){
-
-        delete a person data using his name and last name
-    }*/
-
-
-    /*@PostMapping(value = "/firestation")
-    public addNewFireStation(){
-
-    Add a new firestation mapping or address
-
-    }
-
-    @PutMapping(value = "/firestation")
-    public updateFirestationNumber(){
-
-        Update the number of a firestation from a specific address
-    }
-
-    @DeleteMapping(value = "/firestation")
-    public deleteFirestation(){
-
-        delete a firestation mapping or address
-    }*/
-
-
-    /*@PostMapping(value = "/medicalRecord")
-    public addNewMedicalRecord(){
-
-    Add a new medical record
-
-    }
-
-    @PutMapping(value = "/medicalRecord")
-    public updateMedicalRecord(){
-
-        Update the medical record, the name and last name doesn t change
-    }
-
-    @DeleteMapping(value = "/medicalRecord")
-    public deleteMedicalRecord(){
-
-        delete a medical record using a combinaison of name and last name
     }*/
 
     @GetMapping(value="/")
     public @ResponseBody String greeting(){
         return "Hello, World";
     }
-
 
     @GetMapping(value="/bordello")
     public @ResponseBody String bonjour(){

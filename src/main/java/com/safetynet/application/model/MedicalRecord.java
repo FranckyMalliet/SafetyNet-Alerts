@@ -13,7 +13,7 @@ public class MedicalRecord {
 
     private String firstName;
     private String lastName;
-    private String birthDate;
+    private String birthdate;
     private List<String> medications;
     private List<String> allergies;
 
