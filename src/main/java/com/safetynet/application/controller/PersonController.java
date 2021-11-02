@@ -2,39 +2,23 @@ package com.safetynet.application.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.safetynet.application.model.FireStation;
-import com.safetynet.application.model.MedicalRecord;
 import com.safetynet.application.model.Person;
-import com.safetynet.application.repository.DataDeletingDAO;
-import com.safetynet.application.repository.DataReadingDAO;
-import com.safetynet.application.repository.DataUpdatingDAO;
-import com.safetynet.application.repository.DataWritingDAO;
+import com.safetynet.application.repository.IPersonService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * DataController class is using Url and Uri to get information from a Json file
- *
- */
-
 @RestController
-public class DataController {
+public class PersonController {
 
-    private ObjectMapper mapper = new ObjectMapper();
-
-    @Autowired
-    private DataReadingDAO dataReadingDAO;
+    private final static Logger logger = LoggerFactory.getLogger(PersonController.class);
+    ObjectMapper mapper = new ObjectMapper();
 
     @Autowired
-    private DataWritingDAO dataWritingDAO;
-
-    @Autowired
-    private DataUpdatingDAO dataUpdatingDAO;
-
-    @Autowired
-    private DataDeletingDAO dataDeletingDAO;
+    private IPersonService IPersonService;
 
     /**
      * This URL must be written /fireStation?stationNumber=stationNumber
@@ -47,7 +31,8 @@ public class DataController {
 
     @GetMapping(value = "/fireStation")
     public String fireStationResidentsInfo(@RequestParam String stationNumber) throws JsonProcessingException {
-        List<List<String>> data = dataReadingDAO.getFireStationResidentData(stationNumber);
+        List<List<String>> data = IPersonService.getFireStationResidentData(stationNumber);
+        logger.info("Data from residents coming from the fireStation number : " + stationNumber + " successfully recovered");
         return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(data);
     }
 
@@ -63,21 +48,23 @@ public class DataController {
 
     @GetMapping(value ="/childAlert")
     public String getChildrenList(@RequestParam String address) throws JsonProcessingException {
-        List<Person> data = dataReadingDAO.getChildAlert(address);
+        List<Person> data = IPersonService.getChildAlert(address);
+        logger.info("Children list coming from : " + address + " successfully recovered");
         return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(data);
     }
 
     /**
-     * This URL must be written /phoneAlert?fireStation=fireStationNumber
+     * This URL must be written /phoneAlert?fireStationNumber=fireStationNumber
      * @param stationNumber
      * @return a list of phoneNumber of all residents deserved by a
      * specific fireStation
      * @throws JsonProcessingException
      */
 
-    @GetMapping(value = "phoneAlert")
+    @GetMapping(value = "/phoneAlert")
     public String getResidentsPhone(@RequestParam String stationNumber) throws JsonProcessingException {
-        List<String> data = dataReadingDAO.getResidentPhone(stationNumber);
+        List<String> data = IPersonService.getResidentPhone(stationNumber);
+        logger.info("Phone list of residents coming from the fireStation number : " + stationNumber + " successfully recovered");
         return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(data);
     }
 
@@ -90,9 +77,10 @@ public class DataController {
      * @throws JsonProcessingException
      */
 
-    @GetMapping(value ="fire")
+    @GetMapping(value ="/fire")
     public String getMedicalInformationFromAddress(@RequestParam String address) throws JsonProcessingException {
-        List<List<String>> data = dataReadingDAO.getMedicalInformationFromAddress(address);
+        List<List<String>> data = IPersonService.getMedicalInformationFromAddress(address);
+        logger.info("List of residents deserved by a fireStation at : " + address + " successfully recovered");
         return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(data);
     }
 
@@ -104,9 +92,10 @@ public class DataController {
      * @throws JsonProcessingException
      */
 
-    @GetMapping(value ="flood/stations")
+    @GetMapping(value ="/flood/stations")
     public String getAllPersonsDataFromAListOfFireStation(@RequestParam String stationNumber) throws JsonProcessingException {
-        List<List<String>> data = dataReadingDAO.getAllPersonsDataFromAListOfFireStation(stationNumber);
+        List<List<String>> data = IPersonService.getAllPersonsDataFromAListOfFireStation(stationNumber);
+        logger.info("List of residents deserved by the fireStation number : " + stationNumber + " successfully recovered");
         return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(data);
     }
 
@@ -121,7 +110,8 @@ public class DataController {
 
     @GetMapping(value = "/personInfo")
     public String getPersonInfo(@RequestParam String firstName, @RequestParam String lastName) throws JsonProcessingException {
-        List<List<String>> data = dataReadingDAO.getPersonMedicalData(firstName, lastName);
+        List<List<String>> data = IPersonService.getPersonMedicalData(firstName, lastName);
+        logger.info("Data from " + firstName + " " + lastName + " successfully recovered");
         return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(data);
     }
 
@@ -135,10 +125,10 @@ public class DataController {
 
     @GetMapping(value = "/communityEmail")
     public String getAllPeopleEmailFromACity(@RequestParam String city) throws JsonProcessingException {
-        List<String> recoveringEmailData = dataReadingDAO.getEmailData(city);
+        List<String> recoveringEmailData = IPersonService.getEmailData(city);
+        logger.info("List of email coming from " + city + " successfully recovered");
         return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(recoveringEmailData);
     }
-
 
     // ENDPOINTS
 
@@ -150,7 +140,8 @@ public class DataController {
 
     @PostMapping(value = "/person")
     public void addNewPerson(@RequestBody Person person){
-        dataWritingDAO.writeNewPersonData(person);
+        logger.info("Adding a new person in the json file");
+        IPersonService.writeNewPersonData(person);
     }
 
     /**
@@ -161,7 +152,8 @@ public class DataController {
 
     @PutMapping(value = "/person")
     public void updatePerson(@RequestBody Person person){
-        dataUpdatingDAO.updatePersonData(person);
+        logger.info("Updating a person in the json file");
+        IPersonService.updatePersonData(person);
     }
 
     /**
@@ -173,93 +165,7 @@ public class DataController {
 
     @DeleteMapping(value = "/person")
     public void deletePerson(@RequestParam String firstName, @RequestParam String lastName){
-        dataDeletingDAO.deletePersonData(firstName, lastName);
-    }
-
-    /**
-     * This URL must be written in PostMan or equivalent
-     * @param fireStation
-     * Add a new fireStation in the json file
-     */
-
-    @PostMapping(value = "/firestation")
-    public void addNewFireStation(@RequestBody FireStation fireStation){
-        dataWritingDAO.writeNewFireStationData(fireStation);
-    }
-
-    /**
-     * This URL must be written in PostMan or equivalent
-     * @param fireStation
-     * Update a fireStation in the json file
-     */
-
-    @PutMapping(value = "/firestation")
-    public void updateFirestationNumber(@RequestBody FireStation fireStation){
-        dataUpdatingDAO.updateFireStationData(fireStation);
-    }
-
-    /**
-     * This URL must be written /firestation?address=address&stationNumber=stationNumber
-     * @param address
-     * @param stationNumber
-     * Delete a fireStation in the json file
-     */
-
-    @DeleteMapping(value = "/firestation")
-    public void deleteFirestation(@RequestParam String address, @RequestParam String stationNumber){
-        dataDeletingDAO.deleteFireStationData(address, stationNumber);
-    }
-
-    /**
-     * This URL must be written in PostMan or equivalent
-     * @param medicalRecord
-     * add a new medicalRecord in the json file
-     */
-
-    @PostMapping(value = "/medicalRecord")
-    public void addNewMedicalRecord(@RequestBody MedicalRecord medicalRecord){
-        dataWritingDAO.writeNewMedicalRecordsData(medicalRecord);
-    }
-
-    /**
-     * This URL must be written in PostMan or equivalent
-     * @param medicalRecord
-     * Update a medicalRecord in the json file
-     */
-
-    @PutMapping(value = "/medicalRecord")
-    public void updateMedicalRecord(@RequestBody MedicalRecord medicalRecord){
-        dataUpdatingDAO.updateMedicalRecordsData(medicalRecord);
-    }
-
-    /**
-     * This URL must be written /medicalRecord?firstName=firstName&lastName=lastName
-     * @param firstName
-     * @param lastName
-     * Delete a medical record in the json file
-     */
-
-    @DeleteMapping(value = "/medicalRecord")
-    public void deleteMedicalRecord(@RequestParam String firstName, @RequestParam String lastName){
-        dataDeletingDAO.deleteMedicalRecordData(firstName, lastName);
-    }
-
-    //URL
-    /*
-    logger.info(" Message pour les réponses réussis {}", nomVariable)
-
-    logger.error("Message pour les erreurs ou exceptions)
-
-    logger.debug("Message pour les étapes ou calculs informatifs)
-    }*/
-
-    @GetMapping(value="/")
-    public @ResponseBody String greeting(){
-        return "Hello, World";
-    }
-
-    @GetMapping(value="/bordello")
-    public @ResponseBody String bonjour(){
-        return "Bonjour, Tintin";
+        logger.info("Deleting a person in the json file");
+        IPersonService.deletePersonData(firstName, lastName);
     }
 }
