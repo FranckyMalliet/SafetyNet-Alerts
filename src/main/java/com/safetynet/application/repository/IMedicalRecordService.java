@@ -7,8 +7,8 @@ import java.util.List;
 public interface IMedicalRecordService {
 
     public MedicalRecord getMedicalRecordDataWithFirstNameAndLastName(String firstName, String lastName);
-    public void writeNewMedicalRecordsData(MedicalRecord medicalRecord);
-    public void updateMedicalRecordsData(MedicalRecord medicalRecord);
+    public void writeNewMedicalRecordData(MedicalRecord medicalRecord);
+    public void updateMedicalRecordData(MedicalRecord medicalRecord);
     public void deleteMedicalRecordData(String firstName, String lastName);
     public List<MedicalRecord> getAllMedicalRecord();
 

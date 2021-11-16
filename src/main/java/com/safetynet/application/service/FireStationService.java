@@ -23,16 +23,16 @@ public class FireStationService implements IFireStationService {
     private final static Logger logger = LoggerFactory.getLogger(FireStationService.class);
 
     @Autowired
-    private IPersonService IPersonService;
+    IPersonService IPersonService;
 
     @Autowired
-    private IMedicalRecordService IMedicalRecordService;
+    IMedicalRecordService IMedicalRecordService;
 
     @Autowired
-    private IUtilitiesService IUtilitiesService;
+    IUtilitiesService IUtilitiesService;
 
     @Autowired
-    private DataDAO dataDAO;
+    DataDAO dataDAO;
 
     /**
      * Method used for recovering information from fireStation using the stationNumber
@@ -94,9 +94,6 @@ public class FireStationService implements IFireStationService {
     public List<FireStation> getFireStationInformationWithNumber(String element) {
 
         List<FireStation> fireStationList = new ArrayList<>();
-
-
-        JsonNode rootNode = IUtilitiesService.getRootArray().path("firestations");
 
         for (JsonNode root : IUtilitiesService.getRootArray().path("firestations")) {
             if (root.path("station").asText().equals(element)) {
@@ -198,7 +195,7 @@ public class FireStationService implements IFireStationService {
         }
 
         logger.debug("Deleting station number :" + stationNumber + " at " + address);
-        dataDAO.writeAllData(personList, fireStationList, medicalRecordsList);
+        dataDAO.writeAllData(personList, newFireStationList, medicalRecordsList);
     }
 
     /**

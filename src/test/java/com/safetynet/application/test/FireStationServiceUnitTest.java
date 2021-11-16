@@ -4,9 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.safetynet.application.model.FireStation;
-import com.safetynet.application.repository.IFireStationServiceTest;
-import com.safetynet.application.repository.IMedicalRecordServiceTest;
-import com.safetynet.application.repository.IPersonServiceTest;
+import com.safetynet.application.repository.IFireStationService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,21 +27,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 public class FireStationServiceUnitTest {
 
-    // Mock fireStation data
-    private final String fireStationNumber = "2";
-    private final String fireStationAddress = "25 12th St";
-
     @Autowired
     private WebApplicationContext webApplicationContext;
 
     @Autowired
-    private IFireStationServiceTest IFireStationServiceTest;
-
-    @Autowired
-    private IMedicalRecordServiceTest IMedicalRecordServiceTest;
-
-    @Autowired
-    private IPersonServiceTest IPersonServiceTest;
+    private IFireStationService IFireStationServiceTest;
 
     @Autowired
     private static MockMvc mockMvc;
@@ -53,13 +41,10 @@ public class FireStationServiceUnitTest {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
     }
 
-    // File path for testing
-    private final String path = "E:/Users/Francky Malliet/git/SafetyNet Alerts/dataTest.json";
-
     // Mock fireStation data
     private FireStation fireStationData = new FireStation();
     private final String station = "2";
-    private final String address = "951 LoneTree Rd";
+    private final String address = "25 12th St";
 
     // For FireStation testing
     private List<FireStation> fireStationList = new ArrayList<>();
@@ -121,8 +106,8 @@ public class FireStationServiceUnitTest {
     public void givenAFireStationInformation_AddANewFireStationOrAddress() throws Exception {
         //GIVEN
         FireStation fireStation = new FireStation();
-        fireStation.setAddress(fireStationAddress);
-        fireStation.setStation(fireStationNumber);
+        fireStation.setAddress(address);
+        fireStation.setStation(station);
 
         //WHEN
         ObjectMapper mapper = new ObjectMapper();
@@ -141,8 +126,8 @@ public class FireStationServiceUnitTest {
     public void givenAFireStationNumber_UpdateTheFireStationAddress() throws Exception {
         //GIVEN
         FireStation fireStation = new FireStation();
-        fireStation.setAddress(fireStationAddress);
-        fireStation.setStation(fireStationNumber);
+        fireStation.setAddress(address);
+        fireStation.setStation(station);
 
         //WHEN
         ObjectMapper mapper = new ObjectMapper();
@@ -161,7 +146,7 @@ public class FireStationServiceUnitTest {
     public void givenAFireStationNumber_DeleteTheFireStationOrAddress() throws Exception {
         mockMvc.perform(delete("/fireStationTest")
                         .param("address", address)
-                        .param("stationNumber", fireStationNumber))
+                        .param("stationNumber", station))
                 .andDo(print()).andExpect(status().isOk());
     }
 }

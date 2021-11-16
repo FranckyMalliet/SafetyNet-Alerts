@@ -1,7 +1,7 @@
 package com.safetynet.application.test;
 
 import com.safetynet.application.model.Person;
-import com.safetynet.application.repository.IPersonServiceTest;
+import com.safetynet.application.repository.IPersonService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +16,7 @@ import java.util.List;
 public class PersonServiceUnitTest {
 
     @Autowired
-    private IPersonServiceTest IPersonServiceTest;
+    private IPersonService IPersonServiceTest;
 
     // File path for testing
     private final String path = "E:/Users/Francky Malliet/git/SafetyNet Alerts/dataTest.json";
@@ -34,11 +34,6 @@ public class PersonServiceUnitTest {
     // For Person testing
     private List<Person> personList = new ArrayList<>();
     private Person personDataRecovered = new Person();
-
-    /*@Test
-	public void getFirestationZoneTest() {
-		Assertions.assertThat(fireStationsService.getFirestationZone(3)).isEqualTo(firestationsZoneTest);
-	}*/
 
     @Test
     public void getPersonDataWithAddressTest(){

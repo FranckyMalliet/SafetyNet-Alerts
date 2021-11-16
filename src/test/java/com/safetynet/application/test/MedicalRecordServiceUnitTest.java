@@ -1,7 +1,7 @@
 package com.safetynet.application.test;
 
 import com.safetynet.application.model.MedicalRecord;
-import com.safetynet.application.repository.IMedicalRecordServiceTest;
+import com.safetynet.application.repository.IMedicalRecordService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,7 +17,14 @@ import java.util.List;
 public class MedicalRecordServiceUnitTest {
 
     @Autowired
-    private IMedicalRecordServiceTest IMedicalRecordServiceTest;
+    private IMedicalRecordService IMedicalRecordServiceTest;
+
+    // Mock medicalRecord data
+    private final String firstName = "John";
+    private final String lastName = "Boyd";
+    private final String birthDate = "03/06/1984";
+    private List<String> medications = new ArrayList<>();
+    private List<String> allergies = new ArrayList<>();
 
     @BeforeEach
     public void setup(){
@@ -27,19 +34,6 @@ public class MedicalRecordServiceUnitTest {
 
         allergies.add("nillacilan");
     }
-
-    // File path for testing
-    private final String path = "E:/Users/Francky Malliet/git/SafetyNet Alerts/dataTest.json";
-
-    // Mock medicalRecord data
-    private final String firstName = "John";
-    private final String lastName = "Boyd";
-    private final String birthDate = "03/06/1984";
-    private List<String> medications = new ArrayList<>();
-    private List<String> allergies = new ArrayList<>();
-
-    // For Medical Record testing
-    private List<MedicalRecord> medicalRecordList = new ArrayList<>();
 
     @Test
     public void getMedicalRecordDataWithFirstNameAndLastNameTest(){
@@ -57,6 +51,9 @@ public class MedicalRecordServiceUnitTest {
 
     @Test
     public void getAllMedicalRecordTest(){
+        //GIVEN
+        List<MedicalRecord> medicalRecordList = new ArrayList<>();
+
         //WHEN
         medicalRecordList = IMedicalRecordServiceTest.getAllMedicalRecord();
 

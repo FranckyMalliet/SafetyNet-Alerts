@@ -20,19 +20,19 @@ import java.util.List;
 @Service
 public class PersonService implements IPersonService {
 
+    @Autowired
+    IFireStationService IFireStationService;
+
+    @Autowired
+    IMedicalRecordService IMedicalRecordService;
+
+    @Autowired
+    IUtilitiesService IUtilitiesService;
+
+    @Autowired
+    DataDAO dataDAO;
+
     private final static Logger logger = LoggerFactory.getLogger(PersonService.class);
-
-    @Autowired
-    private IFireStationService IFireStationService;
-
-    @Autowired
-    private IMedicalRecordService IMedicalRecordService;
-
-    @Autowired
-    private IUtilitiesService IUtilitiesService;
-
-    @Autowired
-    private DataDAO dataDAO;
 
     /**
      * Method used for recovering information in a person list using address
@@ -93,38 +93,6 @@ public class PersonService implements IPersonService {
         }
 
         logger.debug("Retrieving a list of persons data with " + lastName + " as last name");
-        return personInformation;
-    }
-
-    /**
-     * Method used for recovering information in a person list using firstName and lastName
-     * @param firstName
-     * @param lastName
-     * @return a list of person information
-     */
-
-    @Override
-    public List<Person> getPersonDataWithFirstNameAndLastName(String firstName, String lastName) {
-
-        List<Person> personInformation = new ArrayList<>();
-
-        for (JsonNode personRoot : IUtilitiesService.getRootArray().path("persons")) {
-            if (personRoot.path("firstName").asText().equals(firstName)&personRoot.path("lastName").asText().equals(lastName)) {
-                Person personData = new Person();
-
-                personData.setFirstName(personRoot.path("firstName").asText());
-                personData.setLastName(personRoot.path("lastName").asText());
-                personData.setAddress(personRoot.path("address").asText());
-                personData.setCity(personRoot.path("city").asText());
-                personData.setZip(personRoot.path("zip").asText());
-                personData.setPhone(personRoot.path("phone").asText());
-                personData.setEmail(personRoot.path("email").asText());
-
-                personInformation.add(personData);
-            }
-        }
-
-        logger.debug("Retrieving person data from " + firstName + " " + lastName);
         return personInformation;
     }
 
@@ -234,12 +202,11 @@ public class PersonService implements IPersonService {
             String personLastName = personData.getLastName();
             if(!personFirstName.equals(firstName)&!personLastName.equals(lastName)){
                 newPersonList.add(personData);
-
             }
         }
 
         logger.debug("Deleting " + firstName + " " + lastName);
-        dataDAO.writeAllData(personList, fireStationList, medicalRecordsList);
+        dataDAO.writeAllData(newPersonList, fireStationList, medicalRecordsList);
     }
 
     /**
@@ -282,7 +249,6 @@ public class PersonService implements IPersonService {
 
         List<List<String>> personAllData = new ArrayList<>();
         List<String> personInformation = new ArrayList<>();
-        List<String> personLastInformation = new ArrayList<>();
 
         int children = 0;
         int adult = 0;
@@ -313,12 +279,15 @@ public class PersonService implements IPersonService {
 
                 logger.debug(personData.getFirstName() + " " + personData.getLastName() + " retrieving data");
             }
+            personInformation.add("The number of adults in the area is : " + String.valueOf(adult));
+            personInformation.add("The number of children in the area is : " + String.valueOf(children));
+            personInformation.add(" --------------- ");
+
+            children = 0;
+            adult = 0;
         }
 
-        personLastInformation.add("The number of adults is : " + String.valueOf(adult));
-        personLastInformation.add("The number of children is : " + String.valueOf(children));
         personAllData.add(personInformation);
-        personAllData.add(personLastInformation);
 
         return personAllData;
     }
@@ -331,21 +300,34 @@ public class PersonService implements IPersonService {
      */
 
     @Override
-    public List<Person> getChildAlert(String address) {
+    public List<List<String>> getAListOfChildFromAnAddressAndAListOfTheOtherResidents(String address) {
 
-        List<Person> personList = new ArrayList<Person>();
+        List<List<String>> personAllData = new ArrayList<>();
+        List<String> childrenList = new ArrayList<>();
+        List<String> adultList = new ArrayList<>();
 
-        List<Person> personInformation = getPersonDataWithAddress(address);
+        childrenList.add("List of children");
+        adultList.add("List of adults");
 
-        for(Person personData : personInformation){
+        List<Person> personList = getPersonDataWithAddress(address);
+        for(Person personData : personList){
             MedicalRecord personMedicalRecord = IMedicalRecordService.getMedicalRecordDataWithFirstNameAndLastName(personData.getFirstName(), personData.getLastName());
             if(Integer.parseInt(IUtilitiesService.getPersonAge(personMedicalRecord.getBirthdate())) <= 18){
-                personList.add(personData);
+                childrenList.add(personData.getFirstName());
+                childrenList.add(personData.getLastName());
+                childrenList.add(IUtilitiesService.getPersonAge(personMedicalRecord.getBirthdate()));
+                childrenList.add(" --------------- ");
+            } else {
+                adultList.add(personData.getFirstName());
+                adultList.add(personData.getLastName());
+                adultList.add(IUtilitiesService.getPersonAge(personMedicalRecord.getBirthdate()));
+                adultList.add(" --------------- ");
             }
         }
 
-        logger.debug("List of children coming from " + address + " retrieving data");
-        return personList;
+        personAllData.add(childrenList);
+        personAllData.add(adultList);
+        return personAllData;
     }
 
     /**
@@ -356,24 +338,26 @@ public class PersonService implements IPersonService {
      */
 
     @Override
-    public List<String> getResidentPhone(String fireStationNumber) {
+    public List<List<String>> getResidentPhoneDeservedByAFireStation(String fireStationNumber) {
 
-        List<String> personInformation = new ArrayList<>();
+        List<List<String>> personAllData = new ArrayList<>();
 
         List<FireStation> fireStationList = IFireStationService.getFireStationInformationWithNumber(fireStationNumber);
 
         for(FireStation fireStationData : fireStationList){
             List<Person> personList = getPersonDataWithAddress(fireStationData.getAddress());
             for(Person personData : personList){
+                List<String> personInformation = new ArrayList<>();
                 personInformation.add(personData.getFirstName());
                 personInformation.add(personData.getLastName());
                 personInformation.add(personData.getPhone());
-                personInformation.add(" --------------- ");
+
                 logger.debug(personData.getFirstName() + " " + personData.getLastName() + " retrieving data");
+                personAllData.add(personInformation);
             }
         }
 
-        return personInformation;
+        return personAllData;
     }
 
     /**
@@ -387,21 +371,21 @@ public class PersonService implements IPersonService {
     public List<List<String>> getMedicalInformationFromAddress(String address){
 
         List<List<String>> personAllData = new ArrayList<>();
-        List<String> personInformation = new ArrayList<>();
 
         List<Person> personList = getPersonDataWithAddress(address);
-
         for(Person personData : personList){
+            List<String> personInformation = new ArrayList<>();
             personInformation.add(personData.getFirstName());
             personInformation.add(personData.getLastName());
             personInformation.add(personData.getPhone());
 
             MedicalRecord medicalRecordData = IMedicalRecordService.getMedicalRecordDataWithFirstNameAndLastName(personData.getFirstName(), personData.getLastName());
-            personInformation.add(String.valueOf(IUtilitiesService.getPersonAge(medicalRecordData.getBirthdate())));
+            personInformation.add(IUtilitiesService.getPersonAge(medicalRecordData.getBirthdate()));
+            personAllData.add(personInformation);
+
             List<String> medicationData = medicalRecordData.getMedications();
             List<String> allergiesData = medicalRecordData.getAllergies();
 
-            personAllData.add(personInformation);
             personAllData.add(medicationData);
             personAllData.add(allergiesData);
 
@@ -422,26 +406,30 @@ public class PersonService implements IPersonService {
      */
 
     @Override
-    public List<List<String>> getAllPersonsDataFromAListOfFireStation(String stationNumber){
+    public List<List<String>> getPersonsDataFromAListOfFireStation(String stationNumber){
 
         List<List<String>> personAllData = new ArrayList<>();
-        List<String> personInformation = new ArrayList<>();
 
         List<String> fireStationAddressList = IFireStationService.getFireStationAddressWithNumber(stationNumber);
         for(String elements : fireStationAddressList){
+            List<String> fireStationInformation = new ArrayList<>();
+            fireStationInformation.add("FireStation number : " + stationNumber + " at " + elements);
+            personAllData.add(fireStationInformation);
+
             List<Person> personList = getPersonDataWithAddress(elements);
             for(Person personData : personList){
+                List<String> personInformation = new ArrayList<>();
                 personInformation.add(personData.getFirstName());
                 personInformation.add(personData.getLastName());
                 personInformation.add(personData.getPhone());
 
                 MedicalRecord medicalRecordData = IMedicalRecordService.getMedicalRecordDataWithFirstNameAndLastName(personData.getFirstName(), personData.getLastName());
-
                 personInformation.add(IUtilitiesService.getPersonAge(medicalRecordData.getBirthdate()));
+                personAllData.add(personInformation);
+
                 List<String> medicationData = medicalRecordData.getMedications();
                 List<String> allergiesData = medicalRecordData.getAllergies();
 
-                personAllData.add(personInformation);
                 personAllData.add(medicationData);
                 personAllData.add(allergiesData);
 
@@ -452,7 +440,7 @@ public class PersonService implements IPersonService {
     }
 
     /**
-     * Method used to a person using firstName and lastName
+     * Method used to get a person data using firstName and lastName
      * Used by DataController class as /personInfo, request mapping GET
      * @param firstName
      * @param lastName
@@ -464,22 +452,23 @@ public class PersonService implements IPersonService {
     public List<List<String>> getPersonMedicalData(String firstName, String lastName){
 
         List<List<String>> personAllData = new ArrayList<>();
-        List<String> personInformation = new ArrayList<>();
 
         List<Person> personList = getPersonDataWithLastName(lastName);
         for(Person personData : personList){
+            List<String> personInformation = new ArrayList<>();
             personInformation.add(personData.getFirstName());
             personInformation.add(personData.getLastName());
             personInformation.add(personData.getAddress());
             personInformation.add(personData.getEmail());
 
             MedicalRecord medicalRecordData = IMedicalRecordService.getMedicalRecordDataWithFirstNameAndLastName(personData.getFirstName(), personData.getLastName());
+            personInformation.add(IUtilitiesService.getPersonAge(medicalRecordData.getBirthdate()));
+
+            personAllData.add(personInformation);
+
             List<String> medicationData = medicalRecordData.getMedications();
             List<String> allergiesData = medicalRecordData.getAllergies();
 
-            personInformation.add(String.valueOf(IUtilitiesService.getPersonAge(medicalRecordData.getBirthdate())));
-
-            personAllData.add(personInformation);
             personAllData.add(medicationData);
             personAllData.add(allergiesData);
 
@@ -510,6 +499,38 @@ public class PersonService implements IPersonService {
         }
 
         return emailData;
+    }
+
+    /**
+     * Method used for recovering information in a person list using firstName and lastName
+     * @param firstName
+     * @param lastName
+     * @return a list of person information
+     */
+
+    @Override
+    public List<Person> getPersonDataWithFirstNameAndLastName(String firstName, String lastName) {
+
+        List<Person> personInformation = new ArrayList<>();
+
+        for (JsonNode personRoot : IUtilitiesService.getRootArray().path("persons")) {
+            if (personRoot.path("firstName").asText().equals(firstName)&personRoot.path("lastName").asText().equals(lastName)) {
+                Person personData = new Person();
+
+                personData.setFirstName(personRoot.path("firstName").asText());
+                personData.setLastName(personRoot.path("lastName").asText());
+                personData.setAddress(personRoot.path("address").asText());
+                personData.setCity(personRoot.path("city").asText());
+                personData.setZip(personRoot.path("zip").asText());
+                personData.setPhone(personRoot.path("phone").asText());
+                personData.setEmail(personRoot.path("email").asText());
+
+                personInformation.add(personData);
+            }
+        }
+
+        logger.debug("Retrieving person data from " + firstName + " " + lastName);
+        return personInformation;
     }
 }
 

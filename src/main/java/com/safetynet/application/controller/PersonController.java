@@ -47,8 +47,8 @@ public class PersonController {
      */
 
     @GetMapping(value ="/childAlert")
-    public String getChildrenList(@RequestParam String address) throws JsonProcessingException {
-        List<Person> data = IPersonService.getChildAlert(address);
+    public String getChildrenListFromAnAddress(@RequestParam String address) throws JsonProcessingException {
+        List<List<String>> data = IPersonService.getAListOfChildFromAnAddressAndAListOfTheOtherResidents(address);
         logger.info("Children list coming from : " + address + " successfully recovered");
         return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(data);
     }
@@ -63,7 +63,7 @@ public class PersonController {
 
     @GetMapping(value = "/phoneAlert")
     public String getResidentsPhone(@RequestParam String stationNumber) throws JsonProcessingException {
-        List<String> data = IPersonService.getResidentPhone(stationNumber);
+        List<List<String>> data = IPersonService.getResidentPhoneDeservedByAFireStation(stationNumber);
         logger.info("Phone list of residents coming from the fireStation number : " + stationNumber + " successfully recovered");
         return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(data);
     }
@@ -94,7 +94,7 @@ public class PersonController {
 
     @GetMapping(value ="/flood/stations")
     public String getAllPersonsDataFromAListOfFireStation(@RequestParam String stationNumber) throws JsonProcessingException {
-        List<List<String>> data = IPersonService.getAllPersonsDataFromAListOfFireStation(stationNumber);
+        List<List<String>> data = IPersonService.getPersonsDataFromAListOfFireStation(stationNumber);
         logger.info("List of residents deserved by the fireStation number : " + stationNumber + " successfully recovered");
         return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(data);
     }

@@ -27,16 +27,16 @@ public class MedicalRecordService implements IMedicalRecordService {
     ObjectMapper mapper = new ObjectMapper();
 
     @Autowired
-    private IPersonService IPersonService;
+    IPersonService IPersonService;
 
     @Autowired
-    private IFireStationService IFireStationService;
+    IFireStationService IFireStationService;
 
     @Autowired
-    private IUtilitiesService IUtilitiesService;
+    IUtilitiesService IUtilitiesService;
 
     @Autowired
-    private DataDAO dataDAO;
+    DataDAO dataDAO;
 
     /**
      * Method used for recovering information in a medical record using
@@ -57,9 +57,9 @@ public class MedicalRecordService implements IMedicalRecordService {
                 medicalRecordData.setFirstName(medicalRecordRoot.path("firstName").asText());
                 medicalRecordData.setLastName(medicalRecordRoot.path("lastName").asText());
                 medicalRecordData.setBirthdate(medicalRecordRoot.path("birthdate").asText());
-                List<String> medicationData = getListOfStringFromJson(medicalRecordRoot, "medications");
+                List<String> medicationData = createAListOfStringFromAListInAJSONFile(medicalRecordRoot, "medications");
                 medicalRecordData.setMedications(medicationData);
-                List<String> allergiesData = getListOfStringFromJson(medicalRecordRoot, "allergies");
+                List<String> allergiesData = createAListOfStringFromAListInAJSONFile(medicalRecordRoot, "allergies");
                 medicalRecordData.setAllergies(allergiesData);
             }
         }
@@ -76,7 +76,7 @@ public class MedicalRecordService implements IMedicalRecordService {
      */
 
     @Override
-    public void writeNewMedicalRecordsData(MedicalRecord medicalRecord) {
+    public void writeNewMedicalRecordData(MedicalRecord medicalRecord) {
 
         List<Person> personList = IPersonService.getAllPerson();
         List<FireStation> fireStationList = IFireStationService.getAllFireStation();
@@ -109,7 +109,7 @@ public class MedicalRecordService implements IMedicalRecordService {
      */
 
     @Override
-    public void updateMedicalRecordsData(MedicalRecord medicalRecord) {
+    public void updateMedicalRecordData(MedicalRecord medicalRecord) {
 
         List<Person> personList = IPersonService.getAllPerson();
         List<FireStation> fireStationList = IFireStationService.getAllFireStation();
@@ -164,7 +164,6 @@ public class MedicalRecordService implements IMedicalRecordService {
             String personLastName = medicalRecordData.getLastName();
             if(!personFirstName.equals(firstName)&!personLastName.equals(lastName)){
                 newMedicalRecordList.add(medicalRecordData);
-
             }
         }
 
@@ -188,9 +187,9 @@ public class MedicalRecordService implements IMedicalRecordService {
             medicalRecordData.setFirstName(medicalRecordRoot.path("firstName").asText());
             medicalRecordData.setLastName(medicalRecordRoot.path("lastName").asText());
             medicalRecordData.setBirthdate(medicalRecordRoot.path("birthdate").asText());
-            List<String> medicationData = getListOfStringFromJson(medicalRecordRoot, "medications");
+            List<String> medicationData = createAListOfStringFromAListInAJSONFile(medicalRecordRoot, "medications");
             medicalRecordData.setMedications(medicationData);
-            List<String> allergiesData = getListOfStringFromJson(medicalRecordRoot, "allergies");
+            List<String> allergiesData = createAListOfStringFromAListInAJSONFile(medicalRecordRoot, "allergies");
             medicalRecordData.setAllergies(allergiesData);
 
             medicalRecordList.add(medicalRecordData);
@@ -208,7 +207,7 @@ public class MedicalRecordService implements IMedicalRecordService {
      * @return a List of Strings of values coming from a json file
      */
 
-    public List<String> getMedicalData(JsonNode root, String medicalData) {
+    public List<String> mapperMedicalData(JsonNode root, String medicalData) {
         try{
             return mapper.readValue(String.valueOf(root.path(medicalData)), new TypeReference<List<String>>() {});
         } catch(IOException error){
@@ -224,9 +223,9 @@ public class MedicalRecordService implements IMedicalRecordService {
      * @return a list of Strings
      */
 
-    public List<String> getListOfStringFromJson(JsonNode root, String rootPointer){
+    public List<String> createAListOfStringFromAListInAJSONFile(JsonNode root, String rootPointer){
         List<String> listOfStrings = new ArrayList<>();
-        List<String> stringExtraction = getMedicalData(root, rootPointer);
+        List<String> stringExtraction = mapperMedicalData(root, rootPointer);
         listOfStrings.addAll(stringExtraction);
         return listOfStrings;
     }

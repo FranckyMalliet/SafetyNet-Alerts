@@ -1,6 +1,6 @@
 package com.safetynet.application.test;
 
-import com.safetynet.application.repository.IUtilitiesServiceTest;
+import com.safetynet.application.repository.IUtilitiesService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 public class UtilitiesServiceUnitTest {
 
     @Autowired
-    private IUtilitiesServiceTest IUtilitiesServiceTest;
+    private IUtilitiesService IUtilitiesServiceTest;
 
     @Test
     public void getPersonAgeTest(){

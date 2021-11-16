@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.safetynet.application.model.FireStation;
 import com.safetynet.application.model.MedicalRecord;
 import com.safetynet.application.model.Person;
+import com.safetynet.application.repository.IFireStationService;
+import com.safetynet.application.repository.IMedicalRecordService;
 import com.safetynet.application.repository.IUtilitiesService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,10 +29,10 @@ public class DataDAO {
     private com.safetynet.application.repository.IPersonService IPersonService;
 
     @Autowired
-    private com.safetynet.application.repository.IFireStationService IFireStationService;
+    private IFireStationService IFireStationService;
 
     @Autowired
-    private com.safetynet.application.repository.IMedicalRecordService IMedicalRecordService;
+    private IMedicalRecordService IMedicalRecordService;
 
     @Autowired
     private IUtilitiesService IUtilitiesService;

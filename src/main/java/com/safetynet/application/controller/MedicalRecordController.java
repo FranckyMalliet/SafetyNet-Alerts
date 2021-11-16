@@ -26,7 +26,7 @@ public class MedicalRecordController {
     @PostMapping(value = "/medicalRecord")
     public void addNewMedicalRecord(@RequestBody MedicalRecord medicalRecord){
         logger.info("Adding a new medicalRecord in the json file");
-        IMedicalRecordService.writeNewMedicalRecordsData(medicalRecord);
+        IMedicalRecordService.writeNewMedicalRecordData(medicalRecord);
     }
 
     /**
@@ -38,7 +38,7 @@ public class MedicalRecordController {
     @PutMapping(value = "/medicalRecord")
     public void updateMedicalRecord(@RequestBody MedicalRecord medicalRecord){
         logger.info("Updating a medicalRecord in the json file");
-        IMedicalRecordService.updateMedicalRecordsData(medicalRecord);
+        IMedicalRecordService.updateMedicalRecordData(medicalRecord);
     }
 
     /**

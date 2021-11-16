@@ -1,15 +1,9 @@
-package com.safetynet.application;
+package com.safetynet.application.test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.safetynet.application.model.FireStation;
-import com.safetynet.application.model.MedicalRecord;
 import com.safetynet.application.model.Person;
-import com.safetynet.application.repository.IFireStationServiceTest;
-import com.safetynet.application.repository.IMedicalRecordServiceTest;
-import com.safetynet.application.repository.IPersonServiceTest;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,16 +14,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class ApplicationITTest {
+class PersonServiceITTest {
 
 	@Autowired
 	private WebApplicationContext webApplicationContext;
@@ -37,55 +28,27 @@ class ApplicationITTest {
 	@Autowired
 	private static MockMvc mockMvc;
 
-	@Autowired
-	private IPersonServiceTest IPersonServiceTest;
-
-	@Autowired
-	private IFireStationServiceTest IFireStationServiceTest;
-
-	@Autowired
-	private IMedicalRecordServiceTest IMedicalRecordServiceTest;
-
 	@BeforeEach
 	public void setupMockMvc(){
 		mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-
-		medications.add("pharmacol:5000mg");
-		medications.add("terazine:10mg");
-
-		allergies.add("peanut");
 	}
 
-	private static ObjectMapper objectMapper;
-
-	// File path for testing
-	private final String path = "E:/Users/Francky Malliet/git/SafetyNet Alerts/dataTest.json";
-
-	// Mock file data for testing
 	// Mock person data
-	private final String firstName = "John";
-	private final String lastName = "Boyd";
+	private final String firstName = "Joe";
+	private final String lastName = "Williams";
 	private final String address = "1509 Culver St";
 	private final String city = "Culver";
 	private final String zip = "97451";
 	private final String phone = "841-874-6501";
-	private final String email = "JohnsonSmith@email.com";
+	private final String email = "JoeWilliams@email.com";
 
 	// Mock fireStation data
 	private final String fireStationNumber = "2";
-	private final String fireStationAddress = "25 12th St";
-
-	// Mock medicalRecord data
-	private final String medicalFirstName = "Joe";
-	private final String medicalLastName = "Williams";
-	private final String birthDate = "03/10/1995";
-	private List<String> medications = new ArrayList<>();
-	private List<String> allergies = new ArrayList<>();
 
 	//FIRESTATION STATION NUMBER
 	@Test
 	public void  givenAFireStationNumber_ReturnAListOfPeopleCoveredByThisFireStation() throws Exception {
-		mockMvc.perform(get("/fireStationTest")
+		mockMvc.perform(get("/fireStation")
 						.param("stationNumber", fireStationNumber))
 				.andDo(print()).andExpect(status().isOk());
 	}
@@ -93,7 +56,7 @@ class ApplicationITTest {
 	//CHILD ALERT
 	@Test
 	public void givenAnAddress_ReturnTwoList_OneWithAllChildrenAndTheSecondWithAdultsLivingInThisAddress() throws Exception {
-		mockMvc.perform(get("/childAlertTest")
+		mockMvc.perform(get("/childAlert")
 						.param("address", address))
 				.andDo(print()).andExpect(status().isOk());
 	}
@@ -101,7 +64,7 @@ class ApplicationITTest {
 	//PHONEALERT
 	@Test
 	public void givenAFireStationNumber_ReturnAllPhoneFromTheArea() throws Exception {
-		mockMvc.perform(get("/phoneAlertTest")
+		mockMvc.perform(get("/phoneAlert")
 						.param("stationNumber", fireStationNumber))
 				.andDo(print()).andExpect(status().isOk());
 	}
@@ -109,7 +72,7 @@ class ApplicationITTest {
 	//FIRE
 	@Test
 	public void givenAnAddress_ReturnPeopleInformationAndFireStationNumber() throws Exception {
-		mockMvc.perform(get("/fireTest")
+		mockMvc.perform(get("/fire")
 						.param("address", address))
 				.andDo(print()).andExpect(status().isOk());
 	}
@@ -117,7 +80,7 @@ class ApplicationITTest {
 	//FLOOD/STATIONS
 	@Test
 	public void givenAFireStation_ReturnAllAddressesDeservedByAFireStation() throws Exception {
-		mockMvc.perform(get("/flood/stationsTest")
+		mockMvc.perform(get("/flood/stations")
 						.param("stationNumber", fireStationNumber))
 				.andDo(print()).andExpect(status().isOk());
 	}
@@ -125,7 +88,7 @@ class ApplicationITTest {
 	//PERSONINFO
 	@Test
 	public void givenANameAndALastName_ReturnAllPersonnalInformation() throws Exception {
-		mockMvc.perform(get("/personInfoTest")
+		mockMvc.perform(get("/personInfo")
 				.param("firstName", firstName)
 				.param("lastName", lastName))
 				.andDo(print()).andExpect(status().isOk());
@@ -134,7 +97,7 @@ class ApplicationITTest {
 	//COMMUNITY EMAIL
 	@Test
 	public void givenACity_ReturnAllEmailAddressOfEveryPersonInThisCity() throws Exception {
-		mockMvc.perform(get("/communityEmailTest")
+		mockMvc.perform(get("/communityEmail")
 				.param("city", city))
 				.andDo(print()).andExpect(status().isOk());
 	}
@@ -159,7 +122,7 @@ class ApplicationITTest {
 		String jsonRequest = objectWriter.writeValueAsString(person);
 
 		//THEN
-		mockMvc.perform(post("/personTest")
+		mockMvc.perform(post("/person")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(jsonRequest))
 				.andExpect(status().isOk());
@@ -184,7 +147,7 @@ class ApplicationITTest {
 		String jsonRequest = objectWriter.writeValueAsString(person);
 
 		//THEN
-		mockMvc.perform(put("/personTest")
+		mockMvc.perform(put("/person")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(jsonRequest))
 				.andExpect(status().isOk());
@@ -192,81 +155,9 @@ class ApplicationITTest {
 
 	@Test
 	public void givenAPersonNameAndLastName_DeleteThisPersonInformation() throws Exception {
-		mockMvc.perform(delete("/personTest")
+		mockMvc.perform(delete("/person")
 						.param("firstName", firstName)
 						.param("lastName", lastName))
-				.andDo(print()).andExpect(status().isOk());
-	}
-
-
-
-
-
-	//ENDPOINT MEDICAL RECORD
-	@Test
-	public void givenAMedicalRecordInformation_AddANewMedicalRecord() throws Exception {
-		//GIVEN
-		MedicalRecord medicalRecord = new MedicalRecord();
-		medicalRecord.setFirstName(medicalFirstName);
-		medicalRecord.setLastName(medicalLastName);
-		medicalRecord.setBirthdate(birthDate);
-		medicalRecord.setMedications(medications);
-		medicalRecord.setAllergies(allergies);
-
-		//WHEN
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.configure(SerializationFeature.WRAP_ROOT_VALUE, false);
-		ObjectWriter objectWriter = mapper.writer().withDefaultPrettyPrinter();
-		String jsonRequest = objectWriter.writeValueAsString(medicalRecord);
-
-		//THEN
-		mockMvc.perform(post("/personTest")
-						.contentType(MediaType.APPLICATION_JSON)
-						.content(jsonRequest))
 				.andExpect(status().isOk());
-	}
-
-	@Test
-	public void givenANameAndLastName_UpdateTheMedicalRecordOfThisPerson() throws Exception {
-		//GIVEN
-		MedicalRecord medicalRecord = new MedicalRecord();
-		medicalRecord.setFirstName(medicalFirstName);
-		medicalRecord.setLastName(medicalLastName);
-		medicalRecord.setBirthdate(birthDate);
-		medicalRecord.setMedications(medications);
-		medicalRecord.setAllergies(allergies);
-
-		//WHEN
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.configure(SerializationFeature.WRAP_ROOT_VALUE, false);
-		ObjectWriter objectWriter = mapper.writer().withDefaultPrettyPrinter();
-		String jsonRequest = objectWriter.writeValueAsString(medicalRecord);
-
-		//THEN
-		mockMvc.perform(put("/personTest")
-						.contentType(MediaType.APPLICATION_JSON)
-						.content(jsonRequest))
-				.andExpect(status().isOk());
-	}
-
-	@Test
-	public void givenANameAndLastName_DeleteTheMedicalRecordOfThisPerson() throws Exception {
-		mockMvc.perform(delete("/medicalRecordTest")
-						.param("firstName", firstName)
-						.param("lastName", lastName))
-				.andDo(print()).andExpect(status().isOk());
-	}
-
-	@Test
-	public void givenThreeListInAMap_WriteAllData(){
-		//GIVEN
-		List<Person> personList = IPersonServiceTest.getAllPerson();
-		List<FireStation> fireStationList = IFireStationServiceTest.getAllFireStation();
-		List<MedicalRecord> medicalRecordList = IMedicalRecordServiceTest.getAllMedicalRecord();
-
-		//THEN
-		Assertions.assertNotNull(personList);
-		Assertions.assertNotNull(fireStationList);
-		Assertions.assertNotNull(medicalRecordList);
 	}
 }

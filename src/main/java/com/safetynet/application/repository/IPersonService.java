@@ -14,10 +14,10 @@ public interface IPersonService {
     public void deletePersonData(String firstName, String lastName);
     public List<Person> getAllPerson();
     public List<List<String>> getFireStationResidentData(String fireStationNumber);
-    public List<Person> getChildAlert(String address);
-    public List<String> getResidentPhone(String fireStationNumber);
+    public List<List<String>> getAListOfChildFromAnAddressAndAListOfTheOtherResidents(String address);
+    public List<List<String>> getResidentPhoneDeservedByAFireStation(String fireStationNumber);
     public List<List<String>> getMedicalInformationFromAddress(String address);
-    public List<List<String>> getAllPersonsDataFromAListOfFireStation(String stationNumber);
+    public List<List<String>> getPersonsDataFromAListOfFireStation(String stationNumber);
     public List<List<String>> getPersonMedicalData(String firstName, String lastName);
     public List<String> getEmailData(String city);
 }
