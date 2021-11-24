@@ -19,7 +19,7 @@ public class PersonServiceUnitTest {
     private IPersonService IPersonServiceTest;
 
     // File path for testing
-    private final String path = "E:/Users/Francky Malliet/git/SafetyNet Alerts/dataTest.json";
+    private final String path = "E:/Users/Francky Malliet/git/SafetyNet Alerts/data.json";
 
     // Mock file data for testing
     // Mock person data

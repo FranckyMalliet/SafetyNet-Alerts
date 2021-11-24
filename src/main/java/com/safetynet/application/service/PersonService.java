@@ -306,9 +306,6 @@ public class PersonService implements IPersonService {
         List<String> childrenList = new ArrayList<>();
         List<String> adultList = new ArrayList<>();
 
-        childrenList.add("List of children");
-        adultList.add("List of adults");
-
         List<Person> personList = getPersonDataWithAddress(address);
         for(Person personData : personList){
             MedicalRecord personMedicalRecord = IMedicalRecordService.getMedicalRecordDataWithFirstNameAndLastName(personData.getFirstName(), personData.getLastName());
@@ -325,8 +322,13 @@ public class PersonService implements IPersonService {
             }
         }
 
-        personAllData.add(childrenList);
-        personAllData.add(adultList);
+        if(!childrenList.isEmpty()){
+            personAllData.add(childrenList);
+            personAllData.add(adultList);
+            childrenList.add("List of children");
+            adultList.add("List of adults");
+        }
+
         return personAllData;
     }
 

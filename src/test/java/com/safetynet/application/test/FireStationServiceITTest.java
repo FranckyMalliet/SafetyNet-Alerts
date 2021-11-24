@@ -29,8 +29,9 @@ public class FireStationServiceITTest {
     private static MockMvc mockMvc;
 
     // Mock fireStation data
-    private final String fireStationNumber = "2";
+    private final String fireStationNumber = "5";
     private final String fireStationAddress = "25 12th St";
+    private final String fireStationAddressUpdate = "17 24th St";
 
     @BeforeEach
     public void setupMockMvc(){
@@ -40,7 +41,6 @@ public class FireStationServiceITTest {
     //ENDPOINT FIRESTATION
     @Test
     public void givenAFireStationInformation_AddANewFireStation() throws Exception {
-        //GIVEN
         FireStation fireStation = new FireStation();
         fireStation.setStation(fireStationNumber);
         fireStation.setAddress(fireStationAddress);
@@ -63,7 +63,7 @@ public class FireStationServiceITTest {
         //GIVEN
         FireStation fireStation = new FireStation();
         fireStation.setStation(fireStationNumber);
-        fireStation.setAddress(fireStationAddress);
+        fireStation.setAddress(fireStationAddressUpdate);
 
         //WHEN
         ObjectMapper mapper = new ObjectMapper();
@@ -82,7 +82,7 @@ public class FireStationServiceITTest {
     public void givenTheNumberAndAddressOfAFireStation_DeleteTheFireStation() throws Exception {
         mockMvc.perform(delete("/fireStation")
                         .param("stationNumber", fireStationNumber)
-                        .param("address", fireStationAddress))
+                        .param("address", fireStationAddressUpdate))
                 .andDo(print()).andExpect(status().isOk());
     }
 }

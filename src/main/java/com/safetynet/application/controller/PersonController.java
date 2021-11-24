@@ -32,7 +32,12 @@ public class PersonController {
     @GetMapping(value = "/fireStation")
     public String fireStationResidentsInfo(@RequestParam String stationNumber) throws JsonProcessingException {
         List<List<String>> data = IPersonService.getFireStationResidentData(stationNumber);
-        logger.info("Data from residents coming from the fireStation number : " + stationNumber + " successfully recovered");
+        if(data.isEmpty()){
+            logger.info("The fireStation number  " + stationNumber + " does not exist");
+        } else {
+            logger.info("Data from residents coming from the fireStation number : " + stationNumber + " successfully recovered");
+        }
+
         return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(data);
     }
 
@@ -49,7 +54,12 @@ public class PersonController {
     @GetMapping(value ="/childAlert")
     public String getChildrenListFromAnAddress(@RequestParam String address) throws JsonProcessingException {
         List<List<String>> data = IPersonService.getAListOfChildFromAnAddressAndAListOfTheOtherResidents(address);
-        logger.info("Children list coming from : " + address + " successfully recovered");
+        if(data.isEmpty()){
+            logger.info("No children has been found at : " + address);
+        } else {
+            logger.info("Children list coming from : " + address + " successfully recovered");
+        }
+
         return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(data);
     }
 
@@ -64,7 +74,12 @@ public class PersonController {
     @GetMapping(value = "/phoneAlert")
     public String getResidentsPhone(@RequestParam String stationNumber) throws JsonProcessingException {
         List<List<String>> data = IPersonService.getResidentPhoneDeservedByAFireStation(stationNumber);
-        logger.info("Phone list of residents coming from the fireStation number : " + stationNumber + " successfully recovered");
+        if(data.isEmpty()){
+            logger.info("The fireStation number " + stationNumber + " does not exist");
+        } else {
+            logger.info("Phone list of residents coming from the fireStation number : " + stationNumber + " successfully recovered");
+        }
+
         return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(data);
     }
 
@@ -80,7 +95,12 @@ public class PersonController {
     @GetMapping(value ="/fire")
     public String getMedicalInformationFromAddress(@RequestParam String address) throws JsonProcessingException {
         List<List<String>> data = IPersonService.getMedicalInformationFromAddress(address);
-        logger.info("List of residents deserved by a fireStation at : " + address + " successfully recovered");
+        if(data.isEmpty()){
+            logger.info("This address " + address + " does not exist");
+        } else {
+            logger.info("List of residents deserved by a fireStation at : " + address + " successfully recovered");
+        }
+
         return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(data);
     }
 
@@ -95,7 +115,12 @@ public class PersonController {
     @GetMapping(value ="/flood/stations")
     public String getAllPersonsDataFromAListOfFireStation(@RequestParam String stationNumber) throws JsonProcessingException {
         List<List<String>> data = IPersonService.getPersonsDataFromAListOfFireStation(stationNumber);
-        logger.info("List of residents deserved by the fireStation number : " + stationNumber + " successfully recovered");
+        if(data.isEmpty()){
+            logger.info("The fireStation number  " + stationNumber + " does not exist");
+        } else {
+            logger.info("List of residents deserved by the fireStation number : " + stationNumber + " successfully recovered");
+        }
+
         return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(data);
     }
 
@@ -111,7 +136,12 @@ public class PersonController {
     @GetMapping(value = "/personInfo")
     public String getPersonInfo(@RequestParam String firstName, @RequestParam String lastName) throws JsonProcessingException {
         List<List<String>> data = IPersonService.getPersonMedicalData(firstName, lastName);
-        logger.info("Data from " + firstName + " " + lastName + " successfully recovered");
+        if(data.isEmpty()){
+            logger.info(firstName + " " + lastName + " does not exist");
+        } else {
+            logger.info("Data from " + firstName + " " + lastName + " successfully recovered");
+        }
+
         return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(data);
     }
 
@@ -125,12 +155,17 @@ public class PersonController {
 
     @GetMapping(value = "/communityEmail")
     public String getAllPeopleEmailFromACity(@RequestParam String city) throws JsonProcessingException {
-        List<String> recoveringEmailData = IPersonService.getEmailData(city);
-        logger.info("List of email coming from " + city + " successfully recovered");
-        return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(recoveringEmailData);
+        List<String> data = IPersonService.getEmailData(city);
+        if(data.isEmpty()){
+            logger.info("This city called " + city + " does not exist in the json file");
+        } else {
+            logger.info("List of email coming from " + city + " successfully recovered");
+        }
+
+        return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(data);
     }
 
-    // ENDPOINTS
+    // ENDPOINTS POST/UPDATE/DELETE
 
     /**
      * This URL must be written in PostMan or equivalent

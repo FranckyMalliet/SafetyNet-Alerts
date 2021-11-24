@@ -125,7 +125,8 @@ public class MedicalRecordService implements IMedicalRecordService {
         logger.debug("Updating medicalRecord : " + updateMedicalRecord.getFirstName() + " " + updateMedicalRecord.getLastName());
 
         for(MedicalRecord medicalRecordData : medicalRecordsList){
-            if(updateMedicalRecord.getFirstName().equals(medicalRecordData.getFirstName())&updateMedicalRecord.getLastName().equals(medicalRecordData.getLastName())){
+            if(updateMedicalRecord.getFirstName().equals(medicalRecordData.getFirstName())
+                    &updateMedicalRecord.getLastName().equals(medicalRecordData.getLastName())){
                 medicalRecordData.setBirthdate(updateMedicalRecord.getBirthdate());
                 medicalRecordData.setMedications(updateMedicalRecord.getMedications());
                 medicalRecordData.setAllergies(updateMedicalRecord.getAllergies());
@@ -229,6 +230,4 @@ public class MedicalRecordService implements IMedicalRecordService {
         listOfStrings.addAll(stringExtraction);
         return listOfStrings;
     }
-
-
 }
